@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farmer Advisory System - Wireframes</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #7f8c8d;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+
+        .screen-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .screen-btn {
+            padding: 12px 24px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .screen-btn:hover {
+            border-color: #27ae60;
+            background: #f0fff4;
+        }
+
+        .screen-btn.active {
+            background: #27ae60;
+            color: white;
+            border-color: #27ae60;
+        }
+
+        .wireframe-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: grid;
+        }
+
+        .phone-frame {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+            border: 8px solid #2c3e50;
+        }
+
+        .phone-header {
+            background: #27ae60;
+            color: white;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .phone-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .menu-icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+        }
+
+        .menu-icon span {
+            display: block;
+            height: 3px;
+            background: white;
+            border-radius: 2px;
+        }
+
+        .phone-content {
+            padding: 20px;
+            min-height: 500px;
+            background: #fafafa;
+        }
+
+        .welcome-section {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 2px dashed #ddd;
+        }
+
+        .welcome-title {
+            font-size: 20px;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .welcome-text {
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+
+        .quick-actions {
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 12px;
+        }
+
+        .action-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .action-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            border: 2px solid #e0e0e0;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .action-card:hover {
+            border-color: #27ae60;
+            transform: translateY(-2px);
+        }
+
+        .action-icon {
+            width: 48px;
+            height: 48px;
+            background: #e8f5e9;
+            border-radius: 50%;
+            margin: 0 auto 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .action-label {
+            font-size: 14px;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+
+        .query-input {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            border: 2px solid #e0e0e0;
+            margin-bottom: 20px;
+        }
+
+        .input-label {
+            font-size: 14px;
+            color: #555;
+            margin-bottom: 8px;
+            display: block;
+            font-weight: 500;
+        }
+
+        .text-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .category-selector {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .category-chip {
+            padding: 8px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            background: white;
+            transition: all 0.3s;
+        }
+
+        .category-chip:hover, .category-chip.active {
+            background: #27ae60;
+            color: white;
+            border-color: #27ae60;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            background: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .submit-btn:hover {
+            background: #229954;
+            transform: translateY(-2px);
+        }
+
+        .response-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            border-left: 4px solid #27ae60;
+        }
+
+        .response-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 12px;
+        }
+
+        .response-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .response-time {
+            font-size: 12px;
+            color: #95a5a6;
+        }
+
+        .response-text {
+            color: #555;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+
+        .response-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .action-btn {
+            padding: 8px 16px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 8px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .action-btn:hover {
+            background: #f5f5f5;
+        }
+
+        .history-item {
+            background: white;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            border: 2px solid #e0e0e0;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .history-item:hover {
+            border-color: #27ae60;
+        }
+
+        .history-question {
+            font-size: 14px;
+            color: #2c3e50;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .history-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #95a5a6;
+        }
+
+        .annotations {
+            background: #fff3cd;
+            border: 2px dashed #ffc107;
+            border-radius: 8px;
+            padding: 12px;
+            margin: 20px 0;
+            font-size: 13px;
+            color: #856404;
+        }
+
+        .desktop-frame {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+            border: 3px solid #2c3e50;
+        }
+
+        .desktop-header {
+            background: #2c3e50;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .desktop-nav {
+            display: flex;
+            gap: 24px;
+            flex: 1;
+        }
+
+        .nav-item {
+            color: white;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 6px;
+            transition: all 0.3s;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .desktop-content {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            min-height: 600px;
+        }
+
+        .sidebar {
+            background: #f8f9fa;
+            padding: 24px;
+            border-right: 2px solid #e0e0e0;
+        }
+
+        .main-content {
+            padding: 32px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            border: 2px solid #e0e0e0;
+            margin-bottom: 16px;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #27ae60;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+
+        .filter-section {
+            margin-bottom: 24px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .profile-section {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            border: 2px solid #e0e0e0;
+            margin-bottom: 20px;
+        }
+
+        .profile-row {
+            display: flex;
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .profile-row:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .profile-label {
+            width: 140px;
+            font-weight: 600;
+            color: #555;
+            font-size: 14px;
+        }
+
+        .profile-value {
+            color: #2c3e50;
+            font-size: 14px;
+        }
+
+        .language-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 8px;
+            background: white;
+            padding: 8px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .lang-btn {
+            padding: 8px 16px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s;
+        }
+
+        .lang-btn.active {
+            background: #27ae60;
+            color: white;
+            border-color: #27ae60;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌾 AI-Based Farmer Advisory System</h1>
+        <p class="subtitle">Interactive UI/UX Wireframes - Click through different screens</p>
+
+        <div class="screen-selector">
+            <button class="screen-btn active" onclick="showScreen('home')">Home Screen</button>
+            <button class="screen-btn" onclick="showScreen('submit')">Submit Query</button>
+            <button class="screen-btn" onclick="showScreen('response')">Response View</button>
+            <button class="screen-btn" onclick="showScreen('history')">Query History</button>
+            <button class="screen-btn" onclick="showScreen('desktop')">Desktop Dashboard</button>
+        </div>
+
+        <!-- HOME SCREEN -->
+        <div id="home" class="screen active">
+            <div class="wireframe-container">
+                <div class="phone-frame">
+                    <div class="phone-header">
+                        <div class="phone-title">KrishiMitra AI</div>
+                        <div class="menu-icon">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </div>
+                    <div class="phone-content">
+                        <div class="welcome-section">
+                            <div class="welcome-title">Welcome, Ramesh!</div>
+                            <div class="welcome-text">How can I help with your farming today?</div>
+                        </div>
+
+                        <div class="quick-actions">
+                            <div class="section-title">Quick Actions</div>
+                            <div class="action-grid">
+                                <div class="action-card">
+                                    <div class="action-icon">🌱</div>
+                                    <div class="action-label">Ask Question</div>
+                                </div>
+                                <div class="action-card">
+                                    <div class="action-icon">🔍</div>
+                                    <div class="action-label">View History</div>
+                                </div>
+                                <div class="action-card">
+                                    <div class="action-icon">☁️</div>
+                                    <div class="action-label">Weather Info</div>
+                                </div>
+                                <div class="action-card">
+                                    <div class="action-icon">📱</div>
+                                    <div class="action-label">Contact Expert</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="recent-queries">
+                            <div class="section-title">Recent Queries</div>
+                            <div class="history-item">
+                                <div class="history-question">How to control pests in wheat crop?</div>
+                                <div class="history-meta">
+                                    <span>🌾 Crop Health</span>
+                                    <span>2 days ago</span>
+                                </div>
+                            </div>
+                            <div class="history-item">
+                                <div class="history-question">Best fertilizer for monsoon season?</div>
+                                <div class="history-meta">
+                                    <span>💧 Soil & Fertilizer</span>
+                                    <span>5 days ago</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="annotations">
+                            📝 <strong>Note:</strong> Simple card-based navigation, vernacular language support, voice input capability
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SUBMIT QUERY SCREEN -->
+        <div id="submit" class="screen">
+            <div class="wireframe-container">
+                <div class="phone-frame">
+                    <div class="phone-header">
+                        <div class="phone-title">← Ask Your Question</div>
+                        <div style="font-size: 24px; cursor: pointer;">🎤</div>
+                    </div>
+                    <div class="phone-content">
+                        <div class="section-title">Select Category</div>
+                        <div class="category-selector">
+                            <div class="category-chip active">🌾 Crop Health</div>
+                            <div class="category-chip">💧 Irrigation</div>
+                            <div class="category-chip">🌱 Seeds</div>
+                            <div class="category-chip">🦟 Pest Control</div>
+                            <div class="category-chip">💰 Market Price</div>
+                            <div class="category-chip">☁️ Weather</div>
+                        </div>
+
+                        <div class="query-input">
+                            <label class="input-label">Your Question</label>
+                            <textarea class="text-input" placeholder="Type your question here... or use voice input above">My tomato plants have yellow leaves. What should I do?</textarea>
+                        </div>
+
+                        <div class="query-input">
+                            <label class="input-label">Crop Type (Optional)</label>
+                            <input type="text" class="input-field" placeholder="e.g., Wheat, Rice, Tomato">
+                        </div>
+
+                        <div class="query-input">
+                            <label class="input-label">Add Photo (Optional)</label>
+                            <div style="padding: 24px; border: 2px dashed #ddd; border-radius: 8px; text-align: center; color: #999;">
+                                📷 Tap to upload crop photo
+                            </div>
+                        </div>
+
+                        <button class="submit-btn">Get AI Advisory</button>
+
+                        <div class="annotations">
+                            📝 <strong>Features:</strong> Voice input, image upload, smart categorization, multilingual support
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RESPONSE VIEW SCREEN -->
+        <div id="response" class="screen">
+            <div class="wireframe-container">
+                <div class="phone-frame">
+                    <div class="phone-header">
+                        <div class="phone-title">← AI Advisory Response</div>
+                        <div style="font-size: 20px; cursor: pointer;">⋮</div>
+                    </div>
+                    <div class="phone-content">
+                        <div class="response-card">
+                            <div class="response-header">
+                                <div>
+                                    <div class="response-title">Yellow Leaves in Tomato Plants</div>
+                                    <div style="font-size: 12px; color: #27ae60; margin-top: 4px;">✓ Response Ready</div>
+                                </div>
+                                <div class="response-time">Just now</div>
+                            </div>
+                            <div class="response-text">
+                                <strong>Diagnosis:</strong> Yellow leaves in tomato plants can indicate nitrogen deficiency or overwatering.
+                                <br><br>
+                                <strong>Recommended Actions:</strong>
+                                <br>1. Check soil moisture - reduce watering if soil is waterlogged
+                                <br>2. Apply balanced NPK fertilizer (10-10-10)
+                                <br>3. Ensure proper drainage in your field
+                                <br>4. Remove affected lower leaves
+                                <br><br>
+                                <strong>Prevention:</strong> Maintain consistent watering schedule and regular soil testing every 3 months.
+                            </div>
+                            <div class="response-actions">
+                                <button class="action-btn">👍 Helpful</button>
+                                <button class="action-btn">💬 Follow-up</button>
+                                <button class="action-btn">📤 Share</button>
+                                <button class="action-btn">🔖 Save</button>
+                            </div>
+                        </div>
+
+                        <div class="query-input">
+                            <label class="input-label">Related Resources</label>
+                            <div class="history-item">
+                                <div class="history-question">📺 Video: Tomato Leaf Disease Guide</div>
+                                <div class="history-meta"><span>5 min watch</span></div>
+                            </div>
+                            <div class="history-item">
+                                <div class="history-question">📄 Guide: Tomato Fertilization Schedule</div>
+                                <div class="history-meta"><span>PDF Download</span></div>
+                            </div>
+                        </div>
+
+                        <button class="submit-btn">Ask Another Question</button>
+
+                        <div class="annotations">
+                            📝 <strong>UX:</strong> Clear diagnosis, actionable steps, follow-up support, related resources
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- HISTORY SCREEN -->
+        <div id="history" class="screen">
+            <div class="wireframe-container">
+                <div class="phone-frame">
+                    <div class="phone-header">
+                        <div class="phone-title">← Query History</div>
+                        <div style="font-size: 20px; cursor: pointer;">🔍</div>
+                    </div>
+                    <div class="phone-content">
+                        <div class="category-selector">
+                            <div class="category-chip active">All</div>
+                            <div class="category-chip">🌾 Crops</div>
+                            <div class="category-chip">💧 Water</div>
+                            <div class="category-chip">🦟 Pests</div>
+                        </div>
+
+                        <div class="section-title">This Week</div>
+                        <div class="response-card">
+                            <div class="response-header">
+                                <div class="response-title">Yellow leaves in tomato plants</div>
+                                <div class="response-time">Today, 10:30 AM</div>
+                            </div>
+                            <div class="response-text" style="font-size: 13px;">
+                                Yellow leaves can indicate nitrogen deficiency...
+                            </div>
+                            <div style="font-size: 12px; color: #27ae60;">🌾 Crop Health • Resolved</div>
+                        </div>
+
+                        <div class="response-card">
+                            <div class="response-header">
+                                <div class="response-title">How to control pests in wheat crop?</div>
+                                <div class="response-time">2 days ago</div>
+                            </div>
+                            <div class="response-text" style="font-size: 13px;">
+                                For wheat pest control, consider integrated pest management...
+                            </div>
+                            <div style="font-size: 12px; color: #27ae60;">🦟 Pest Control • Resolved</div>
+                        </div>
+
+                        <div class="section-title">Last Week</div>
+                        <div class="response-card">
+                            <div class="response-header">
+                                <div class="response-title">Best fertilizer for monsoon season?</div>
+                                <div class="response-time">5 days ago</div>
+                            </div>
+                            <div class="response-text" style="font-size: 13px;">
+                                During monsoon, use slow-release fertilizers to prevent nutrient runoff...
+                            </div>
+                            <div style="font-size: 12px; color: #27ae60;">💧 Soil & Fertilizer • Resolved</div>
+                        </div>
+
+                        <div class="annotations">
+                            📝 <strong>Features:</strong> Searchable history, category filters, status tracking, easy re-query
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DESKTOP DASHBOARD -->
+        <div id="desktop" class="screen">
+            <div class="wireframe-container" style="grid-template-columns: 1fr;">
+                <div class="desktop-frame">
+                    <div class="desktop-header">
+                        <div style="color: white; font-size: 20px; font-weight: 700;">🌾 KrishiMitra AI Dashboard</div>
+                        <div class="desktop-nav">
+                            <div class="nav-item active">Dashboard</div>
+                            <div class="nav-item">Queries</div>
+                            <div class="nav-item">Analytics</div>
+                            <div class="nav-item">Resources</div>
+                        </div>
+                        <div style="color: white; font-size: 14px;">👤 Admin</div>
+                    </div>
+                    <div class="desktop-content">
+                        <div class="sidebar">
+                            <div class="stat-card">
+                                <div class="stat-value">1,247</div>
+                                <div class="stat-label">Total Queries</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">98%</div>
+                                <div class="stat-label">Response Rate</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">4.8/5</div>
+                                <div class="stat-label">Avg. Rating</div>
+                            </div>
+
+                            <div class="filter-section">
+                                <div class="section-title">Filter Queries</div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" checked>
+                                    <span>Crop Health</span>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" checked>
+                                    <span>Pest Control</span>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox">
+                                    <span>Irrigation</span>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox">
+                                    <span>Market Prices</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="main-content">
+                            <div class="section-title" style="font-size: 20px; margin-bottom: 20px;">Recent Farmer Queries</div>
+                            
+                            <div class="response-card">
+                                <div class="response-header">
+                                    <div>
+                                        <div class="response-title">Yellow leaves in tomato plants - What to do?</div>
+                                        <div style="font-size: 13px; color: #7f8c8d; margin-top: 4px;">Farmer: Ramesh Kumar • Location: Punjab • Crop: Tomato</div>
+                                    </div>
+                                    <div class="response-time">10:30 AM</div>
+                                </div>
+                                <div class="response-text">
+                                    <strong>AI Response Summary:</strong> Diagnosed as nitrogen deficiency or overwatering. Provided 4-step treatment plan including fertilizer application and drainage improvement.
+                                </div>
+                                <div class="response-actions">
+                                    <button class="action-btn">✓ Resolved</button>
+                                    <button class="action-btn">📊 View Details</button>
+                                    <button class="action-btn">👍 Helpful (Yes)</button>
+                                </div>
+                            </div>
+
+                            <div class="response-card">
+                                <div class="response-header">
+                                    <div>
+                                        <div class="response-title">When to apply pesticides in wheat field?</div>
+                                        <div style="font-size: 13px; color: #7f8c8d; margin-top: 4px;">Farmer: Suresh Patel • Location: Haryana • Crop: Wheat</div>
+                                    </div>
+                                    <div class="response-time">9:15 AM</div>
+                                </div>
+                                <div class="response-text">
+                                    <strong>AI Response Summary:</strong> Recommended timing based on crop stage and weather conditions. Included safety precautions and dosage instructions.
+                                </div>
+                                <div class="response-actions">
+                                    <button class="action-btn">⏳ Pending Follow-up</button>
+                                    <button class="action-btn">📊 View Details</button>
+                                    <button class="action-btn">👤 Assign Expert</button>
+                                </div>
+                            </div>
+
+                            <div class="response-card">
+                                <div class="response-header">
+                                    <div>
+                                        <div class="response-title">Best irrigation schedule for rice paddy?</div>
+                                        <div style="font-size: 13px; color: #7f8c8d; margin-top: 4px;">Farmer: Arjun Singh • Location: West Bengal • Crop: Rice</div>
+                                    </div>
+                                    <div class="response-time">Yesterday</div>
+                                </div>
+                                <div class="response-text">
+                                    <strong>AI Response Summary:</strong> Provided water management guide based on rice growth stages, local weather patterns, and soil type analysis.
+                                </div>
+                                <div class="response-actions">
+                                    <button class="action-btn">✓ Resolved</button>
+                                    <button class="action-btn">📊 View Details</button>
+                                    <button class="action-btn">👍 Helpful (Yes)</button>
+                                </div>
+                            </div>
+
+                            <div class="annotations">
+                                📝 <strong>Admin Features:</strong> Query management, analytics dashboard, farmer profiles, expert assignment, quality monitoring
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showScreen(screenId) {
+            // Hide all screens
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            
+            // Remove active class from all buttons
+            document.querySelectorAll('.screen-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected screen
+            document.getElementById(screenId).classList.add('active');
+            
+            // Add active class to clicked button
+            event.target.classList.add('active');
+        }
+
+        // Add interactivity to category chips
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('category-chip')) {
+                e.target.classList.toggle('active');
+            }
+        });
+    </script>
+</body>
+</html>
