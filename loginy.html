@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>KisanAI – Farmer Advisory System</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --g1:#1b3a2a;--g2:#2d5c3e;--g3:#4a8c5c;
+  --am:#c97c10;--aml:#f0a832;
+  --td:#1c2b22;--tm:#3d5245;--tl:#5c7566;
+  --bdr:#c5d9bb;
+  --r:18px;--rs:11px;
+  --shadow:0 32px 80px rgba(5,18,10,0.55),0 8px 24px rgba(5,18,10,0.3);
+}
+html,body{min-height:100vh;font-family:'Outfit',sans-serif;overflow-x:hidden;background:#0d1f12}
+
+/* ═══════════════════════════════════════════
+   REALISTIC PHOTO SLIDESHOW BACKGROUND
+   Uses 6 real farm/agriculture Unsplash photos
+   ═══════════════════════════════════════════ */
+.slideshow{
+  position:fixed;inset:0;z-index:0;
+}
+.slide{
+  position:absolute;inset:0;
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
+  opacity:0;
+  transition:opacity 2s ease-in-out;
+  will-change:opacity;
+}
+.slide.active{opacity:1}
+
+/* Real Unsplash farm photography URLs */
+.slide-1{background-image:url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=1920&q=90&fit=crop&crop=center')}
+/* Golden wheat field at sunrise — vast, cinematic */
+.slide-2{background-image:url('https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=1920&q=90&fit=crop&crop=center')}
+/* Indian farmer in green paddy field */
+.slide-3{background-image:url('https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=1920&q=90&fit=crop&crop=center')}
+/* Lush green terraced farmland, aerial */
+.slide-4{background-image:url('https://images.unsplash.com/photo-1464226184884-fa280b87c399?w=1920&q=90&fit=crop&crop=center')}
+/* Rich farmland rows with tractor tracks */
+.slide-5{background-image:url('https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=1920&q=90&fit=crop&crop=center')}
+/* Close-up of ripe wheat ears in field */
+.slide-6{background-image:url('https://images.unsplash.com/photo-1595113316349-9fa4eb24f884?w=1920&q=90&fit=crop&crop=center')}
+/* Farmer's hands holding fresh soil/seeds */
+
+/* Dark cinematic overlay — deeper at edges, lighter in center */
+.slide-overlay{
+  position:fixed;inset:0;z-index:1;
+  background:
+    radial-gradient(ellipse at center, rgba(5,18,10,0.38) 0%, rgba(5,18,10,0.72) 100%),
+    linear-gradient(180deg, rgba(5,18,10,0.3) 0%, rgba(5,18,10,0.15) 40%, rgba(5,18,10,0.55) 100%);
+}
+
+/* Subtle vignette for depth */
+.vignette{
+  position:fixed;inset:0;z-index:2;
+  background:radial-gradient(ellipse at 50% 50%, transparent 45%, rgba(2,10,5,0.65) 100%);
+  pointer-events:none;
+}
+
+/* Film grain texture overlay for photorealism */
+.grain{
+  position:fixed;inset:0;z-index:3;
+  pointer-events:none;
+  opacity:0.04;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat:repeat;
+  animation:grainShift 0.15s steps(1) infinite;
+}
+@keyframes grainShift{
+  0%{background-position:0 0}
+  20%{background-position:-60px 30px}
+  40%{background-position:40px -20px}
+  60%{background-position:-30px 60px}
+  80%{background-position:50px 10px}
+  100%{background-position:-10px -40px}
+}
+
+/* Slideshow caption (current scene label) */
+.scene-label{
+  position:fixed;bottom:1.5rem;left:2rem;z-index:10;
+  font-size:0.7rem;color:rgba(255,255,255,0.35);
+  letter-spacing:2px;text-transform:uppercase;
+  font-family:'Outfit',sans-serif;font-weight:300;
+  transition:opacity 0.5s ease;
+  pointer-events:none;
+  text-shadow:0 1px 4px rgba(0,0,0,0.5);
+}
+
+/* Slide progress dots */
+.slide-dots{
+  position:fixed;bottom:1.6rem;right:2rem;z-index:10;
+  display:flex;gap:6px;align-items:center;
+}
+.dot{
+  width:5px;height:5px;border-radius:50%;
+  background:rgba(255,255,255,0.25);
+  transition:all 0.4s ease;cursor:pointer;border:none;padding:0;
+}
+.dot.active{background:rgba(255,255,255,0.85);width:18px;border-radius:3px}
+
+/* ═══════════════════════════════════
+   PAGE LAYOUT
+   ═══════════════════════════════════ */
+.page{
+  position:relative;z-index:4;
+  min-height:100vh;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:2rem 1rem;
+}
+
+/* ═══════════════════════════════════
+   LOGO
+   ═══════════════════════════════════ */
+.logo{
+  display:flex;align-items:center;gap:0.9rem;
+  margin-bottom:1.4rem;
+  animation:dropIn 0.7s cubic-bezier(.22,1,.36,1) both;
+}
+@keyframes dropIn{from{opacity:0;transform:translateY(-22px)}to{opacity:1;transform:translateY(0)}}
+
+.logo-badge{
+  width:56px;height:56px;border-radius:16px;
+  background:linear-gradient(135deg,var(--am),var(--aml));
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.85rem;
+  box-shadow:0 8px 28px rgba(201,124,16,0.5),0 2px 8px rgba(201,124,16,0.3);
+  animation:badgePulse 3.5s ease-in-out infinite;
+}
+@keyframes badgePulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+
+.logo-text{display:flex;flex-direction:column;line-height:1.1}
+.logo-name{
+  font-family:'Cormorant Garamond',serif;
+  font-size:2.2rem;font-weight:700;
+  color:#fff;letter-spacing:-0.2px;
+  text-shadow:0 2px 20px rgba(0,0,0,0.6),0 0 40px rgba(0,0,0,0.3);
+}
+.logo-sub{
+  font-size:0.7rem;color:rgba(255,255,255,0.65);
+  font-weight:400;letter-spacing:2px;
+  text-transform:uppercase;
+  text-shadow:0 1px 8px rgba(0,0,0,0.5);
+}
+
+/* ═══════════════════════════════════
+   AUTH CARD
+   ═══════════════════════════════════ */
+.card{
+  width:100%;max-width:424px;
+  background:rgba(250,247,241,0.97);
+  backdrop-filter:blur(24px) saturate(1.4);
+  -webkit-backdrop-filter:blur(24px) saturate(1.4);
+  border-radius:var(--r);
+  box-shadow:var(--shadow);
+  border:1px solid rgba(255,255,255,0.55);
+  padding:2.3rem 2.5rem 2.1rem;
+  animation:cardRise 0.6s 0.12s cubic-bezier(.22,1,.36,1) both;
+}
+@keyframes cardRise{
+  from{opacity:0;transform:translateY(32px) scale(0.96)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+
+/* ═══════════════════════════════════
+   TABS
+   ═══════════════════════════════════ */
+.tabs{
+  display:flex;background:#e6f0e6;
+  border-radius:11px;padding:4px;gap:4px;margin-bottom:1.6rem;
+}
+.tab{
+  flex:1;padding:0.57rem;border:none;background:transparent;
+  border-radius:8px;cursor:pointer;
+  font-family:'Outfit',sans-serif;font-size:0.9rem;font-weight:500;
+  color:var(--tl);transition:all .22s ease;
+}
+.tab.active{
+  background:var(--g2);color:#fff;
+  box-shadow:0 2px 12px rgba(45,92,62,0.32);
+}
+
+/* ═══════════════════════════════════
+   PANELS
+   ═══════════════════════════════════ */
+.panel{display:none}
+.panel.active{display:block;animation:panelIn .28s ease both}
+@keyframes panelIn{from{opacity:0;transform:translateX(10px)}to{opacity:1;transform:translateX(0)}}
+
+.form-title{
+  font-family:'Cormorant Garamond',serif;
+  font-size:1.52rem;font-weight:600;
+  color:var(--g1);margin-bottom:0.2rem;
+}
+.form-sub{font-size:0.82rem;color:var(--tl);margin-bottom:1.3rem}
+
+/* ═══════════════════════════════════
+   FIELDS
+   ═══════════════════════════════════ */
+.field{margin-bottom:1rem}
+.field label{
+  display:block;font-size:0.78rem;font-weight:600;
+  color:var(--tm);margin-bottom:0.33rem;letter-spacing:0.3px;
+}
+.irow{position:relative;display:flex;align-items:center}
+.ico{
+  position:absolute;left:0.82rem;
+  font-size:0.95rem;pointer-events:none;z-index:2;line-height:1;
+}
+.irow input,.irow select{
+  width:100%;
+  padding:0.7rem 2.5rem 0.7rem 2.45rem;
+  border:1.8px solid var(--bdr);border-radius:var(--rs);
+  font-family:'Outfit',sans-serif;font-size:0.875rem;
+  color:var(--td);background:#fff;outline:none;
+  transition:border-color .2s,box-shadow .2s,background .2s;
+  -webkit-appearance:none;appearance:none;
+}
+.irow input:focus,.irow select:focus{
+  border-color:var(--g3);
+  box-shadow:0 0 0 3.5px rgba(74,140,92,0.15);
+  background:#f2faf4;
+}
+.irow select{cursor:pointer}
+.field.err .irow input,.field.err .irow select{
+  border-color:#d63c3c;
+  box-shadow:0 0 0 3px rgba(214,60,60,0.12);
+}
+.errmsg{display:block;font-size:0.73rem;color:#d63c3c;font-weight:500;margin-top:0.22rem;min-height:1rem}
+
+.eye{
+  position:absolute;right:0.72rem;
+  background:none;border:none;cursor:pointer;
+  font-size:0.95rem;opacity:0.42;padding:4px;
+  transition:opacity .2s;line-height:1;
+}
+.eye:hover{opacity:0.9}
+
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem}
+
+.meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.1rem}
+.chklbl{display:flex;align-items:center;gap:0.45rem;font-size:0.81rem;color:var(--tl);cursor:pointer}
+.chklbl input{width:14px;height:14px;accent-color:var(--g2);cursor:pointer;flex-shrink:0}
+.lnk{color:var(--g3);font-size:0.81rem;font-weight:500;text-decoration:none;transition:color .2s}
+.lnk:hover{color:var(--g1);text-decoration:underline}
+
+/* Strength bar */
+.sbar{height:3px;background:#dde8d8;border-radius:2px;margin-top:0.34rem;overflow:hidden}
+.sfill{height:100%;width:0;border-radius:2px;transition:width .4s ease,background .4s ease}
+.slbl{display:block;font-size:0.71rem;font-weight:500;margin-top:0.18rem}
+
+/* Terms row */
+.termsrow{display:flex;align-items:flex-start;gap:0.5rem;margin-bottom:1rem;font-size:0.8rem;color:var(--tl)}
+.termsrow input{width:14px;height:14px;margin-top:3px;flex-shrink:0;accent-color:var(--g2);cursor:pointer}
+
+/* ═══════════════════════════════════
+   BUTTON
+   ═══════════════════════════════════ */
+.btn{
+  width:100%;padding:0.87rem;
+  background:linear-gradient(135deg,var(--g1),var(--g2));
+  color:#fff;border:none;border-radius:var(--rs);
+  font-family:'Outfit',sans-serif;font-size:0.97rem;font-weight:600;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;gap:0.5rem;
+  margin-top:0.5rem;
+  box-shadow:0 5px 20px rgba(27,58,42,0.4);
+  transition:transform .2s,box-shadow .2s,background .2s;
+  overflow:hidden;
+}
+.btn:hover{
+  transform:translateY(-2px);
+  box-shadow:0 12px 30px rgba(27,58,42,0.48);
+  background:linear-gradient(135deg,#16301f,#255038);
+}
+.btn:active{transform:translateY(0)}
+.btn:disabled{opacity:0.6;cursor:not-allowed;transform:none}
+.spin{animation:spinning 1s linear infinite;display:inline-block}
+@keyframes spinning{to{transform:rotate(360deg)}}
+
+/* Divider */
+.divider{display:flex;align-items:center;gap:0.75rem;margin:1rem 0;font-size:0.75rem;color:var(--tl)}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--bdr)}
+
+/* Social */
+.socials{display:flex;gap:0.65rem}
+.sbtn{
+  flex:1;padding:0.6rem;
+  border:1.8px solid var(--bdr);background:#fff;
+  border-radius:var(--rs);
+  display:flex;align-items:center;justify-content:center;gap:0.42rem;
+  font-family:'Outfit',sans-serif;font-size:0.82rem;font-weight:500;
+  color:var(--td);cursor:pointer;
+  transition:background .2s,border-color .2s,transform .2s,box-shadow .2s;
+}
+.sbtn:hover{
+  background:#f0faf3;border-color:var(--g3);
+  transform:translateY(-1px);box-shadow:0 4px 12px rgba(74,140,92,0.15);
+}
+
+/* Back btn */
+.back{
+  background:none;border:none;color:var(--g3);
+  font-family:'Outfit',sans-serif;font-size:0.82rem;font-weight:500;
+  cursor:pointer;padding:0;margin-bottom:1rem;transition:color .2s;
+}
+.back:hover{color:var(--g1)}
+
+/* ═══════════════════════════════════
+   LANGUAGE BAR
+   ═══════════════════════════════════ */
+.langbar{
+  display:flex;align-items:center;gap:0.5rem;
+  margin-top:1.1rem;font-size:0.78rem;
+  color:rgba(255,255,255,0.75);
+  text-shadow:0 1px 6px rgba(0,0,0,0.4);
+  animation:dropIn 0.7s 0.3s cubic-bezier(.22,1,.36,1) both;
+}
+.langbar select{
+  padding:0.27rem 0.65rem;
+  border:1.5px solid rgba(255,255,255,0.4);
+  border-radius:7px;background:rgba(255,255,255,0.88);
+  font-size:0.78rem;font-family:'Outfit',sans-serif;
+  color:var(--td);cursor:pointer;outline:none;
+  transition:border-color .2s,box-shadow .2s;
+}
+.langbar select:focus{border-color:var(--aml);box-shadow:0 0 0 2px rgba(240,168,50,0.25)}
+
+/* ═══════════════════════════════════
+   TOAST
+   ═══════════════════════════════════ */
+#toast{
+  position:fixed;bottom:2.2rem;left:50%;
+  transform:translateX(-50%) translateY(80px);
+  padding:0.72rem 1.6rem;border-radius:40px;
+  font-size:0.84rem;font-weight:500;color:#fff;
+  z-index:9999;opacity:0;
+  transition:transform .38s cubic-bezier(.22,1,.36,1),opacity .38s;
+  white-space:nowrap;max-width:88vw;pointer-events:none;
+  box-shadow:0 8px 28px rgba(0,0,0,0.3);
+}
+#toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+#toast.ok{background:#176634}
+#toast.er{background:#b83232}
+#toast.in{background:#1a6b5a}
+
+/* ═══════════════════════════════════
+   SUCCESS OVERLAY
+   ═══════════════════════════════════ */
+#overlay{
+  position:fixed;inset:0;z-index:999;
+  background:rgba(5,15,8,0.88);
+  backdrop-filter:blur(12px);
+  display:none;align-items:center;justify-content:center;
+}
+#overlay.show{display:flex;animation:ovIn .32s ease}
+@keyframes ovIn{from{opacity:0}to{opacity:1}}
+.ok-card{
+  background:#fff;border-radius:var(--r);padding:2.6rem 2.8rem;
+  text-align:center;max-width:340px;width:90%;
+  box-shadow:0 32px 80px rgba(0,0,0,0.35);
+  animation:popIn .42s cubic-bezier(.22,1,.36,1);
+}
+@keyframes popIn{from{transform:scale(.8) translateY(24px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
+.ok-icon{font-size:3.4rem;margin-bottom:1rem;display:block;animation:iconIn .5s .15s cubic-bezier(.22,1,.36,1) both}
+@keyframes iconIn{from{transform:scale(0)}to{transform:scale(1)}}
+.ok-card h3{font-family:'Cormorant Garamond',serif;font-size:1.55rem;color:var(--g1);margin-bottom:0.4rem}
+.ok-card p{font-size:0.84rem;color:var(--tl);margin-bottom:1.4rem}
+.prog{height:5px;background:#e0ead8;border-radius:3px;overflow:hidden}
+.progfill{height:100%;width:0;border-radius:3px;background:linear-gradient(90deg,var(--g2),var(--aml));transition:width 2.8s linear}
+
+/* ─── util ─── */
+.hidden{display:none!important}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:3px}
+
+@media(max-width:480px){
+  .card{padding:1.6rem 1.3rem;max-width:100%}
+  .row2{grid-template-columns:1fr}
+  .logo-name{font-size:1.75rem}
+  .logo-badge{width:48px;height:48px;font-size:1.55rem}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════
+     REALISTIC PHOTO SLIDESHOW BACKGROUND
+     ═══════════════════════════════════════ -->
+<div class="slideshow" id="slideshow">
+  <div class="slide slide-1 active"></div>
+  <div class="slide slide-2"></div>
+  <div class="slide slide-3"></div>
+  <div class="slide slide-4"></div>
+  <div class="slide slide-5"></div>
+  <div class="slide slide-6"></div>
+</div>
+
+<!-- Layered overlays for cinematic depth -->
+<div class="slide-overlay"></div>
+<div class="vignette"></div>
+<div class="grain"></div>
+
+<!-- Scene label -->
+<div class="scene-label" id="scene-label">Golden Wheat Fields</div>
+
+<!-- Dot navigation -->
+<div class="slide-dots" id="dots"></div>
+
+<!-- ═══════════════════════════════════
+     MAIN PAGE
+     ═══════════════════════════════════ -->
+<div class="page">
+
+  <!-- Logo -->
+  <div class="logo">
+    <div class="logo-badge">🌾</div>
+    <div class="logo-text">
+      <span class="logo-name">KisanAI</span>
+      <span class="logo-sub">Farmer Advisory System</span>
+    </div>
+  </div>
+
+  <!-- Card -->
+  <div class="card">
+
+    <div class="tabs">
+      <button class="tab active" id="t-login"    onclick="show('login')">Login</button>
+      <button class="tab"        id="t-register" onclick="show('register')">Register</button>
+    </div>
+
+    <!-- ── LOGIN ── -->
+    <div class="panel active" id="p-login">
+      <h2 class="form-title">Welcome back, Kisan 👋</h2>
+      <p  class="form-sub">Sign in to get today's farming advisory</p>
+
+      <div class="field" id="f-lg-id">
+        <label>Phone / Email</label>
+        <div class="irow">
+          <span class="ico">📱</span>
+          <input type="text" id="lg-id" placeholder="Enter phone or email" autocomplete="username"/>
+        </div>
+        <span class="errmsg" id="e-lg-id"></span>
+      </div>
+
+      <div class="field" id="f-lg-pw">
+        <label>Password</label>
+        <div class="irow">
+          <span class="ico">🔒</span>
+          <input type="password" id="lg-pw" placeholder="Enter your password" autocomplete="current-password"/>
+          <button class="eye" onclick="toggleEye('lg-pw',this)">👁️</button>
+        </div>
+        <span class="errmsg" id="e-lg-pw"></span>
+      </div>
+
+      <div class="meta">
+        <label class="chklbl"><input type="checkbox" id="remember"/> Remember me</label>
+        <a href="#" class="lnk" onclick="show('forgot');return false">Forgot password?</a>
+      </div>
+
+      <button class="btn" id="btn-login" onclick="doLogin()">
+        <span id="btl-txt">Login</span>
+      </button>
+
+      <div class="divider"><span>or continue with</span></div>
+
+      <div class="socials">
+        <button class="sbtn" onclick="social('Google')">
+          <svg width="16" height="16" viewBox="0 0 48 48">
+            <path fill="#4285F4" d="M44.5 20H24v8.5h11.7C34.6 33 29.8 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.7 1.1 7.8 2.9l6-6C34.4 6.1 29.5 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20c11 0 19.7-8 19.7-20 0-1.3-.1-2.7-.2-4z"/>
+            <path fill="#34A853" d="M6.3 14.7l7 5.1C15 16.1 19.1 13 24 13c3 0 5.7 1.1 7.8 2.9l6-6C34.4 6.1 29.5 4 24 4 16.2 4 9.4 8.4 6.3 14.7z"/>
+            <path fill="#FBBC05" d="M24 44c5.7 0 10.5-1.9 14.1-5.1l-6.5-5.3C29.7 35.6 27 36.5 24 36.5c-5.7 0-10.6-3.9-12.3-9.1l-7 5.4C8 38.4 15.4 44 24 44z"/>
+            <path fill="#EA4335" d="M44.5 20H24v8.5h11.7c-.9 2.5-2.6 4.6-4.9 6.1l6.5 5.3c3.8-3.5 6.2-8.7 6.2-14.9 0-1.3-.1-2.7-.2-4z"/>
+          </svg>
+          Google
+        </button>
+        <button class="sbtn" onclick="social('Facebook')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="#1877F2">
+            <path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z"/>
+          </svg>
+          Facebook
+        </button>
+      </div>
+    </div>
+
+    <!-- ── REGISTER ── -->
+    <div class="panel" id="p-register">
+      <h2 class="form-title">Join KisanAI 🌱</h2>
+      <p  class="form-sub">Create your free farmer account</p>
+
+      <div class="row2">
+        <div class="field" id="f-rg-fn">
+          <label>First Name</label>
+          <div class="irow">
+            <span class="ico">👤</span>
+            <input type="text" id="rg-fn" placeholder="First name"/>
+          </div>
+          <span class="errmsg" id="e-rg-fn"></span>
+        </div>
+        <div class="field" id="f-rg-ln">
+          <label>Last Name</label>
+          <div class="irow">
+            <input type="text" id="rg-ln" placeholder="Last name" style="padding-left:0.9rem"/>
+          </div>
+          <span class="errmsg" id="e-rg-ln"></span>
+        </div>
+      </div>
+
+      <div class="field" id="f-rg-ph">
+        <label>Phone Number</label>
+        <div class="irow">
+          <span class="ico">📱</span>
+          <input type="tel" id="rg-ph" placeholder="+91 98765 43210"/>
+        </div>
+        <span class="errmsg" id="e-rg-ph"></span>
+      </div>
+
+      <div class="field" id="f-rg-em">
+        <label>Email Address</label>
+        <div class="irow">
+          <span class="ico">✉️</span>
+          <input type="email" id="rg-em" placeholder="youremail@example.com"/>
+        </div>
+        <span class="errmsg" id="e-rg-em"></span>
+      </div>
+
+      <div class="row2">
+        <div class="field" id="f-rg-st">
+          <label>State</label>
+          <div class="irow">
+            <span class="ico">📍</span>
+            <select id="rg-st">
+              <option value="">Select State</option>
+              <option>Punjab</option><option>Haryana</option>
+              <option>Uttar Pradesh</option><option>Maharashtra</option>
+              <option>Rajasthan</option><option>Madhya Pradesh</option>
+              <option>Gujarat</option><option>Karnataka</option>
+              <option>Andhra Pradesh</option><option>Tamil Nadu</option>
+              <option>West Bengal</option><option>Bihar</option>
+              <option>Odisha</option><option>Telangana</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <span class="errmsg" id="e-rg-st"></span>
+        </div>
+        <div class="field" id="f-rg-cr">
+          <label>Primary Crop</label>
+          <div class="irow">
+            <span class="ico">🌾</span>
+            <select id="rg-cr">
+              <option value="">Select Crop</option>
+              <option>Wheat</option><option>Rice / Paddy</option>
+              <option>Cotton</option><option>Maize</option>
+              <option>Sugarcane</option><option>Soybean</option>
+              <option>Mustard</option><option>Groundnut</option>
+              <option>Tomato</option><option>Onion</option>
+              <option>Potato</option><option>Other Vegetables</option>
+            </select>
+          </div>
+          <span class="errmsg" id="e-rg-cr"></span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Preferred Language</label>
+        <div class="irow">
+          <span class="ico">🌐</span>
+          <select id="rg-lg">
+            <option value="">Select Language</option>
+            <option value="en">English</option>
+            <option value="hi">हिंदी (Hindi)</option>
+            <option value="pa">ਪੰਜਾਬੀ (Punjabi)</option>
+            <option value="mr">मराठी (Marathi)</option>
+            <option value="gu">ગુજરાતી (Gujarati)</option>
+            <option value="kn">ಕನ್ನಡ (Kannada)</option>
+            <option value="ta">தமிழ் (Tamil)</option>
+            <option value="te">తెలుగు (Telugu)</option>
+            <option value="bn">বাংলা (Bengali)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field" id="f-rg-pw">
+        <label>Password</label>
+        <div class="irow">
+          <span class="ico">🔒</span>
+          <input type="password" id="rg-pw" placeholder="Min 8 characters" oninput="strength(this.value)"/>
+          <button class="eye" onclick="toggleEye('rg-pw',this)">👁️</button>
+        </div>
+        <div class="sbar"><div class="sfill" id="sfill"></div></div>
+        <span class="slbl" id="slbl"></span>
+        <span class="errmsg" id="e-rg-pw"></span>
+      </div>
+
+      <div class="field" id="f-rg-cp">
+        <label>Confirm Password</label>
+        <div class="irow">
+          <span class="ico">🔐</span>
+          <input type="password" id="rg-cp" placeholder="Re-enter password"/>
+          <button class="eye" onclick="toggleEye('rg-cp',this)">👁️</button>
+        </div>
+        <span class="errmsg" id="e-rg-cp"></span>
+      </div>
+
+      <label class="termsrow">
+        <input type="checkbox" id="terms"/>
+        <span>I agree to the <a href="#" class="lnk">Terms &amp; Conditions</a> and <a href="#" class="lnk">Privacy Policy</a></span>
+      </label>
+
+      <button class="btn" id="btn-reg" onclick="doRegister()">
+        <span id="btr-txt">Create Account</span>
+      </button>
+    </div>
+
+    <!-- ── FORGOT ── -->
+    <div class="panel" id="p-forgot">
+      <button class="back" onclick="show('login')">← Back to Login</button>
+      <h2 class="form-title">Reset Password 🔑</h2>
+      <p  class="form-sub">Enter your registered phone or email to receive a reset link</p>
+
+      <div class="field" id="f-fp-id">
+        <label>Phone / Email</label>
+        <div class="irow">
+          <span class="ico">📱</span>
+          <input type="text" id="fp-id" placeholder="Registered phone or email"/>
+        </div>
+        <span class="errmsg" id="e-fp-id"></span>
+      </div>
+
+      <button class="btn" id="btn-fp" onclick="doForgot()">
+        <span id="btf-txt">Send Reset Link</span>
+      </button>
+    </div>
+
+  </div><!-- /card -->
+
+  <!-- Language bar -->
+  <div class="langbar">
+    <span>🌐</span>
+    <select onchange="changeLang(this.value)">
+      <option value="en">English</option>
+      <option value="hi">हिंदी</option>
+      <option value="pa">ਪੰਜਾਬੀ</option>
+      <option value="mr">मराठी</option>
+      <option value="ta">தமிழ்</option>
+    </select>
+  </div>
+
+</div><!-- /page -->
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<!-- Success overlay -->
+<div id="overlay">
+  <div class="ok-card">
+    <span class="ok-icon">✅</span>
+    <h3 id="ok-title">Success!</h3>
+    <p  id="ok-desc">Redirecting to your dashboard…</p>
+    <div class="prog"><div class="progfill" id="progfill"></div></div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════
+   SLIDESHOW ENGINE
+   ═══════════════════════════════ */
+const SCENES = [
+  'Golden Wheat Fields',
+  'Paddy Farming',
+  'Green Terraced Farmland',
+  'Rich Farmland Rows',
+  'Ripe Wheat Ears',
+  'Seeds & Fertile Soil'
+];
+const INTERVAL = 6000;
+let current = 0;
+
+function initSlideshow() {
+  const slides = document.querySelectorAll('.slide');
+  const dotsEl = document.getElementById('dots');
+  const labelEl = document.getElementById('scene-label');
+
+  // Build dots
+  SCENES.forEach((_, i) => {
+    const d = document.createElement('button');
+    d.className = 'dot' + (i===0 ? ' active' : '');
+    d.setAttribute('aria-label', 'Scene '+(i+1));
+    d.onclick = () => goTo(i);
+    dotsEl.appendChild(d);
+  });
+
+  function goTo(n) {
+    slides[current].classList.remove('active');
+    dotsEl.children[current].classList.remove('active');
+    current = (n + slides.length) % slides.length;
+    slides[current].classList.add('active');
+    dotsEl.children[current].classList.add('active');
+    // Fade label
+    labelEl.style.opacity = '0';
+    setTimeout(() => {
+      labelEl.textContent = SCENES[current];
+      labelEl.style.opacity = '1';
+    }, 400);
+  }
+
+  setInterval(() => goTo(current + 1), INTERVAL);
+}
+
+/* ═══════════════════════════════
+   SIMULATED BACKEND API
+   ═══════════════════════════════ */
+const API = (() => {
+  const KEY = 'kisanai_db';
+  const db  = () => { try { return JSON.parse(localStorage.getItem(KEY)) || [] } catch { return [] } };
+  const save = d => localStorage.setItem(KEY, JSON.stringify(d));
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+  const hash = pw => { let h=0; for(let c of pw){ h=((h<<5)-h)+c.charCodeAt(0); h|=0 } return Math.abs(h).toString(16) };
+
+  return {
+    async login(id, pw, rem) {
+      await wait(1100);
+      const users = db();
+      const u = users.find(u => u.phone===id || u.email===id.toLowerCase());
+      if (!u)           return { ok:false, field:'id', msg:'No account found with this phone/email.' };
+      if (u.pw!==hash(pw)) return { ok:false, field:'pw', msg:'Incorrect password. Please try again.' };
+      const tok = btoa(JSON.stringify({ id:u.id, name:u.fn, exp: Date.now()+(rem?30:1)*86400000 }));
+      (rem?localStorage:sessionStorage).setItem('ki_tok', tok);
+      return { ok:true, name:u.fn };
+    },
+    async register(data) {
+      await wait(1300);
+      const users = db();
+      if (users.find(u=>u.phone===data.phone))             return { ok:false, field:'ph', msg:'Phone already registered.' };
+      if (data.email&&users.find(u=>u.email===data.email)) return { ok:false, field:'em', msg:'Email already registered.' };
+      const id = 'F'+Date.now().toString(36).toUpperCase();
+      users.push({ id, fn:data.fn, ln:data.ln, phone:data.phone, email:data.email, pw:hash(data.pw), state:data.state, crop:data.crop });
+      save(users);
+      return { ok:true, name:data.fn };
+    },
+    async forgot(id) {
+      await wait(900);
+      const u = db().find(u=>u.phone===id||u.email===id.toLowerCase());
+      if (!u) return { ok:false, msg:'No account found with this phone/email.' };
+      return { ok:true };
+    },
+    session() {
+      const t = localStorage.getItem('ki_tok')||sessionStorage.getItem('ki_tok');
+      if (!t) return null;
+      try { const p=JSON.parse(atob(t)); return Date.now()<p.exp?p:null } catch { return null }
+    }
+  };
+})();
+
+/* ═══════════════════════════════
+   UI HELPERS
+   ═══════════════════════════════ */
+let toastTimer;
+function toast(msg, type='in', ms=3200) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.className = 'show '+type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.className='', ms);
+}
+
+function showSuccess(title, desc) {
+  document.getElementById('ok-title').textContent = title;
+  document.getElementById('ok-desc').textContent  = desc;
+  document.getElementById('overlay').classList.add('show');
+  requestAnimationFrame(() => {
+    const f = document.getElementById('progfill');
+    f.style.width='0';
+    requestAnimationFrame(() => f.style.width='100%');
+  });
+}
+
+function setLoad(btnId, txtId, on, label='') {
+  const b=document.getElementById(btnId), t=document.getElementById(txtId);
+  b.disabled=on;
+  t.innerHTML = on ? '<span class="spin">⏳</span> Please wait…' : label;
+}
+
+function clearE(fid) {
+  const f=document.getElementById('f-'+fid);
+  if(f){f.classList.remove('err');const e=document.getElementById('e-'+fid);if(e)e.textContent=''}
+}
+function setE(fid, msg) {
+  const f=document.getElementById('f-'+fid);
+  if(f){f.classList.add('err');const e=document.getElementById('e-'+fid);if(e)e.textContent=msg}
+}
+
+/* ═══════════════════════════════
+   TABS
+   ═══════════════════════════════ */
+function show(tab) {
+  ['login','register','forgot'].forEach(t=>{
+    document.getElementById('p-'+t).classList.toggle('active',t===tab);
+    const tb=document.getElementById('t-'+t);
+    if(tb) tb.classList.toggle('active',t===tab);
+  });
+}
+
+/* ═══════════════════════════════
+   PASSWORD EYE
+   ═══════════════════════════════ */
+function toggleEye(id, btn) {
+  const i=document.getElementById(id);
+  i.type=i.type==='password'?'text':'password';
+  btn.textContent=i.type==='password'?'👁️':'🙈';
+}
+
+/* ═══════════════════════════════
+   STRENGTH
+   ═══════════════════════════════ */
+function strength(pw) {
+  const f=document.getElementById('sfill'), l=document.getElementById('slbl');
+  const score=[pw.length>=8,/[A-Z]/.test(pw),/[0-9]/.test(pw),/[^A-Za-z0-9]/.test(pw),pw.length>=12].filter(Boolean).length;
+  const lvl=[
+    {p:'0',  c:'#d63c3c',t:''},
+    {p:'20', c:'#d63c3c',t:'⚠️ Very Weak'},
+    {p:'42', c:'#d97c20',t:'⚡ Weak'},
+    {p:'62', c:'#c9a020',t:'🔶 Fair'},
+    {p:'82', c:'#4e9e5e',t:'✅ Strong'},
+    {p:'100',c:'#176634',t:'🛡️ Very Strong'},
+  ][score];
+  f.style.width=lvl.p+'%';f.style.background=lvl.c;
+  l.textContent=lvl.t;l.style.color=lvl.c;
+}
+
+/* ═══════════════════════════════
+   VALIDATORS
+   ═══════════════════════════════ */
+const isId    = v => /^(\+91)?[6-9]\d{9}$/.test(v.replace(/\s/g,'')) || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+const isPhone = v => /^(\+91)?[6-9]\d{9}$/.test(v.replace(/[\s\-]/g,'')) || /^\+?\d{10,14}$/.test(v.replace(/\s/g,''));
+const isEmail = v => !v || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+
+/* ═══════════════════════════════
+   LOGIN
+   ═══════════════════════════════ */
+async function doLogin() {
+  const id=document.getElementById('lg-id').value.trim();
+  const pw=document.getElementById('lg-pw').value;
+  const rm=document.getElementById('remember').checked;
+  ['lg-id','lg-pw'].forEach(clearE);
+  let ok=true;
+  if(!id||!isId(id)){setE('lg-id','Enter a valid phone number or email.');ok=false}
+  if(!pw)           {setE('lg-pw','Password is required.');ok=false}
+  if(!ok) return;
+  setLoad('btn-login','btl-txt',true);
+  const r=await API.login(id,pw,rm);
+  setLoad('btn-login','btl-txt',false,'Login');
+  if(r.ok){
+    showSuccess(`Welcome back, ${r.name}! 🌾`,'Redirecting to your farming dashboard…');
+    setTimeout(()=>{
+      document.getElementById('overlay').classList.remove('show');
+      toast('🎉 Demo: Would redirect to dashboard!','ok',4000);
+    },3100);
+  } else {
+    setE('lg-'+(r.field==='id'?'id':'pw'), r.msg);
+    toast('❌ '+r.msg,'er');
+  }
+}
+
+/* ═══════════════════════════════
+   REGISTER
+   ═══════════════════════════════ */
+async function doRegister() {
+  const fn=document.getElementById('rg-fn').value.trim();
+  const ln=document.getElementById('rg-ln').value.trim();
+  const ph=document.getElementById('rg-ph').value.trim();
+  const em=document.getElementById('rg-em').value.trim();
+  const st=document.getElementById('rg-st').value;
+  const cr=document.getElementById('rg-cr').value;
+  const pw=document.getElementById('rg-pw').value;
+  const cp=document.getElementById('rg-cp').value;
+  const tc=document.getElementById('terms').checked;
+  ['rg-fn','rg-ph','rg-em','rg-st','rg-cr','rg-pw','rg-cp'].forEach(clearE);
+  let ok=true;
+  if(!fn)          {setE('rg-fn','First name is required.');ok=false}
+  if(!isPhone(ph)) {setE('rg-ph','Enter a valid phone number.');ok=false}
+  if(!isEmail(em)) {setE('rg-em','Enter a valid email address.');ok=false}
+  if(!st)          {setE('rg-st','Please select your state.');ok=false}
+  if(!cr)          {setE('rg-cr','Please select your primary crop.');ok=false}
+  if(pw.length<8)  {setE('rg-pw','Password must be at least 8 characters.');ok=false}
+  if(pw!==cp)      {setE('rg-cp','Passwords do not match.');ok=false}
+  if(!tc)          {toast('⚠️ Please agree to Terms & Conditions.','er');ok=false}
+  if(!ok) return;
+  setLoad('btn-reg','btr-txt',true);
+  const r=await API.register({fn,ln,phone:ph,email:em.toLowerCase(),state:st,crop:cr,pw});
+  setLoad('btn-reg','btr-txt',false,'Create Account');
+  if(r.ok){
+    showSuccess('Account Created! 🌱',`Welcome, ${r.name}! You can now login.`);
+    setTimeout(()=>{
+      document.getElementById('overlay').classList.remove('show');
+      show('login');
+      document.getElementById('lg-id').value=ph;
+      toast('🎉 Account ready! Please login.','ok',4000);
+    },3100);
+  } else {
+    const m={ph:'rg-ph',em:'rg-em'};
+    if(m[r.field]) setE(m[r.field],r.msg);
+    toast('❌ '+r.msg,'er');
+  }
+}
+
+/* ═══════════════════════════════
+   FORGOT
+   ═══════════════════════════════ */
+async function doForgot() {
+  const id=document.getElementById('fp-id').value.trim();
+  clearE('fp-id');
+  if(!isId(id)){setE('fp-id','Enter a valid phone or email.');return}
+  setLoad('btn-fp','btf-txt',true);
+  const r=await API.forgot(id);
+  setLoad('btn-fp','btf-txt',false,'Send Reset Link');
+  if(r.ok){toast('📩 Reset link sent! Check your phone/email.','ok',5000);setTimeout(()=>show('login'),2600)}
+  else    {setE('fp-id',r.msg);toast('❌ '+r.msg,'er')}
+}
+
+function social(p){toast(`🔄 ${p} login — coming soon!`,'in')}
+
+/* ═══════════════════════════════
+   LANGUAGE
+   ═══════════════════════════════ */
+const i18n={
+  en:{t1:'Login',t2:'Register',wt:'Welcome back, Kisan 👋',ws:"Sign in to get today's farming advisory",jt:'Join KisanAI 🌱',js:'Create your free farmer account'},
+  hi:{t1:'लॉगिन',t2:'रजिस्टर',wt:'वापस स्वागत है, किसान 👋',ws:'साइन इन करें और सलाह पाएं',jt:'KisanAI से जुड़ें 🌱',js:'अपना निःशुल्क खाता बनाएं'},
+  pa:{t1:'ਲੌਗਇਨ',t2:'ਰਜਿਸਟਰ',wt:'ਵਾਪਸ ਸੁਆਗਤ, ਕਿਸਾਨ 👋',ws:'ਸਾਈਨ ਇਨ ਕਰੋ ਅਤੇ ਸਲਾਹ ਪ੍ਰਾਪਤ ਕਰੋ',jt:'KisanAI ਨਾਲ ਜੁੜੋ 🌱',js:'ਆਪਣਾ ਮੁਫ਼ਤ ਖਾਤਾ ਬਣਾਓ'},
+  mr:{t1:'लॉगिन',t2:'नोंदणी',wt:'परत स्वागत, शेतकरी 👋',ws:'साइन इन करा आणि सल्ला मिळवा',jt:'KisanAI मध्ये सामील व्हा 🌱',js:'आपले मोफत खाते तयार करा'},
+  ta:{t1:'உள்நுழை',t2:'பதிவு',wt:'மீண்டும் வரவேற்கிறோம் 👋',ws:'உள்நுழைந்து விவசாய ஆலோசனை பெறுங்கள்',jt:'KisanAI இல் சேரவும் 🌱',js:'உங்கள் இலவச கணக்கை உருவாக்கவும்'},
+};
+function changeLang(l) {
+  const t=i18n[l]||i18n.en;
+  document.getElementById('t-login').textContent=t.t1;
+  document.getElementById('t-register').textContent=t.t2;
+  document.querySelector('#p-login .form-title').textContent=t.wt;
+  document.querySelector('#p-login .form-sub').textContent=t.ws;
+  document.querySelector('#p-register .form-title').textContent=t.jt;
+  document.querySelector('#p-register .form-sub').textContent=t.js;
+  toast('🌐 Language updated','in',1800);
+}
+
+/* ═══════════════════════════════
+   INIT
+   ═══════════════════════════════ */
+document.addEventListener('DOMContentLoaded', () => {
+  initSlideshow();
+
+  // Keyboard submit
+  ['lg-id','lg-pw'].forEach(id=>{
+    document.getElementById(id)?.addEventListener('keydown', e=>{if(e.key==='Enter')doLogin()});
+  });
+  document.getElementById('fp-id')?.addEventListener('keydown', e=>{if(e.key==='Enter')doForgot()});
+  ['rg-fn','rg-ln','rg-ph','rg-em','rg-pw','rg-cp'].forEach(id=>{
+    document.getElementById(id)?.addEventListener('keydown', e=>{if(e.key==='Enter')doRegister()});
+  });
+
+  // Clear error on focus
+  document.querySelectorAll('input,select').forEach(el=>{
+    el.addEventListener('focus',()=>el.closest('.field')?.classList.remove('err'));
+  });
+
+  // Session check
+  const s=API.session();
+  if(s) toast(`👋 Session active for ${s.name}. Welcome back!`,'ok',3500);
+});
+</script>
+</body>
+</html>
